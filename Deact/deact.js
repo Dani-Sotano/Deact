@@ -1,8 +1,8 @@
 const Deact = {
-    createElement: () => {
-        const element = document.createElement('div')
-        element.textContent = 'Hello World'
-        element.className = 'container'
+    createElement: (type, content) => {
+        const element = document.createElement(type)
+        element.textContent = content.children
+        element.className = content.className
         return element
       } 
   }
