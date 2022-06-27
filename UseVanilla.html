@@ -1,11 +1,14 @@
 <body>
     <div id='root'>
+        <script type="text/javascript" src="./Deact/deact.js"></script>
+        <script type="text/javascript" src="./Deact/deact-dom.js"></script>
         <script type="text/javascript">
             const rootElement = document.getElementById('root')
-            const element = document.createElement('div')
-            element.textContent = 'Hello World'
-            element.className = 'container'
-            rootElement.appendChild(element)
+            const element = Deact.createElement('div', {
+                children: 'Hello World',
+                className: 'container'
+            })
+            DeactDOM.render(element, rootElement)
         </script>
     </div>
 </body>
