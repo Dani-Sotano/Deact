@@ -1,5 +1,7 @@
 const DeactDOM = {
     render: (child, parent) => {
-        parent.appendChild(child)
+        const deactElement = createdReactBasedOnJsx(child)
+        const javaScriptElement = Deact.deactToJavaScript(deactElement)
+        parent.appendChild(javaScriptElement)
     } 
 }
