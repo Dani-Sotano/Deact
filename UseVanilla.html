@@ -3,10 +3,15 @@
         <script type="text/javascript" src="./Deact/deact.js"></script>
         <script type="text/javascript" src="./Deact/deact-dom.js"></script>
         <script type="text/javascript" src="./Deact/deact-jsx.js"></script>
+        <script type="text/javascript" src="./Deact/App.js"></script>
         <script type="text/javascript">
             const rootElement = document.getElementById('root')
-            const element = "<div className='container'><span>Hello</span><span> World</span></div>"
+            const element = "<div className='container'><App></App></div>"
+            const element1 = "<div className='container'><span>Two </span><span>children</span></div>"
+            const element2 = "<div className='container'>string</div>"
             DeactDOM.render(element, rootElement)
+            DeactDOM.render(element1, rootElement)
+            DeactDOM.render(element2, rootElement)
         </script>
     </div>
 </body>

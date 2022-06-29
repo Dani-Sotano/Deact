@@ -11,31 +11,24 @@ const extractAttributesFromTag = (attributeString) => {
     return attributes
 }
 
-const addElementToParent = (child, parent) => {
-    if (parent.props.children) {
-        if (typeof parent.props.children == 'string') {
-            let arr = [parent.props.children, child]
-            parent.props.children = arr
-        } else {
-            parent.props.children.push(child);
-        }
-    } else {
-        if (typeof child == 'string') {
-            parent.props.children = child
-        } else {
-            parent.props.children = [child];
-        }
-    }
-}
 
 
 const createdDeactElementFromOpenTag = (match, parentElement) => {
     let elementAttributes = extractAttributesFromTag(match.groups.attributes)
-    let newElement = new deactElement(match.groups.open, match.groups.any, elementAttributes, parentElement);
-    
+    let newElement;
+    if (match.groups.open.charCodeAt(0) >= 65 && match.groups.open.charCodeAt(0) <= 90) {
+        if (eval(match.groups.open)) {
+            let component = eval(match.groups.open)
+            newElement = createdReactBasedOnJsx(component)
+            newElement.parent = parentElement
+            parentElement.addChild(newElement)
+        }
+    } else {
+        newElement = new deactElement(match.groups.open, match.groups.any, elementAttributes, parentElement);
+    }
     if (parentElement) {
         newElement.parent = parentElement
-        addElementToParent(newElement, parentElement)
+        parentElement.addChild(newElement, parentElement)
     }
     return newElement;
 }
@@ -59,24 +52,38 @@ const matchIsCloseTag = (match) => {
     return match.groups.close != null;
 }
 
+const matchIsComponent = (match) => {
+   return match.groups.open.charCodeAt(0) >= 65 && match.groups.open.charCodeAt(0) <= 90
+}
+
 
 const createdReactBasedOnJsx = (jsxString) => {
-    const patternDividingJSXElements = /<(?<open>[a-z]+)(?<attributes>([^>]*))>(?<any>[^<>]*)|<\/(?<close>[a-z]*)>/g;
+    const patternDividingJSXElements = /<(?<open>[a-zA-Z]+)(?<attributes>([^>]*))>(?<any>[^<>]*)|<\/(?<close>[a-z]*)>/g;
     jsxString = jsxString.replace(/(\r\n|\n|\r)/gm, "")
-    let parentElement;
-    let match;
+    let parentElement
+    let match
 
     while ((match = patternDividingJSXElements.exec(jsxString)) != null) {
-        if (matchIsOpenTag(match)) {
-            parentElement = createdDeactElementFromOpenTag(match, parentElement)
+        if(matchIsOpenTag(match)) {
+            if(matchIsComponent(match)){
+                if (eval(match.groups.open)) {
+                    let component = eval(match.groups.open)
+                    newElement = createdReactBasedOnJsx(component)
+                    newElement.parent = parentElement
+                    parentElement.addChild(newElement)
+                }
+                // parent element stays the same, only child is added
+            } else {
+                parentElement = createdDeactElementFromOpenTag(match, parentElement)
+            }
         } else if (matchIsCloseTag) {
             closeParentElement(match.groups.close, parentElement)
             // tree structure: only top element has no parent
             // if element has no parent, we reached the top  
             if (!parentElement.parent) {
-                break;
+                break
             }
-            parentElement = parentElement.parent;
+            parentElement = parentElement.parent
         }
     }
     return parentElement;
@@ -84,23 +91,32 @@ const createdReactBasedOnJsx = (jsxString) => {
 
 
 class deactElement {
-    type;
-    value;
-    onChange;
-    props = {};
-    closed = false;
-    parent;
+    type
+    value
+    onChange
+    props = {}
+    closed = false
+    parent
 
     constructor(type, content, attributes, parent) {
-        this.type = type;
+        this.type = type
         if (typeof content == deactElement) {
             this.props.children = new deactElement(content.type, content.content, content.parent);
         } else if (typeof content == 'string') {
-            this.props.children = content;
+            this.props.children = [content];
             for (let attribute of attributes) {
                 this[attribute.key] = attribute.value
             }
         }
-        this.parent = parent;
+        this.parent = parent
+    }
+
+    addChild = (child) => {
+        if (this.props.children) {
+                this.props.children.push(child)
+        } else {
+            this.props.children = [child]
+
+        }
     }
 }

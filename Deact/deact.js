@@ -12,7 +12,6 @@ const createDocumentElement = (deact) => {
 
     let element = document.createElement(deact.type);
     addAttributesToElement(deact, element)
-    
     if (typeof deact.props.children == 'string') {
         element.textContent = deact.props.children;
     } else {
