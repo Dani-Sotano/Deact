@@ -15,17 +15,8 @@ const extractAttributesFromTag = (attributeString) => {
 
 const createdDeactElementFromOpenTag = (match, parentElement) => {
     let elementAttributes = extractAttributesFromTag(match.groups.attributes)
-    let newElement;
-    if (match.groups.open.charCodeAt(0) >= 65 && match.groups.open.charCodeAt(0) <= 90) {
-        if (eval(match.groups.open)) {
-            let component = eval(match.groups.open)
-            newElement = createdReactBasedOnJsx(component)
-            newElement.parent = parentElement
-            parentElement.addChild(newElement)
-        }
-    } else {
-        newElement = new deactElement(match.groups.open, match.groups.any, elementAttributes, parentElement);
-    }
+    let newElement = new deactElement(match.groups.open, match.groups.any, elementAttributes, parentElement);
+    
     if (parentElement) {
         newElement.parent = parentElement
         parentElement.addChild(newElement, parentElement)
@@ -62,12 +53,11 @@ const createdReactBasedOnJsx = (jsxString) => {
     jsxString = jsxString.replace(/(\r\n|\n|\r)/gm, "")
     let parentElement
     let match
-
     while ((match = patternDividingJSXElements.exec(jsxString)) != null) {
         if(matchIsOpenTag(match)) {
             if(matchIsComponent(match)){
                 if (eval(match.groups.open)) {
-                    let component = eval(match.groups.open)
+                    let component = eval(match.groups.open)()
                     newElement = createdReactBasedOnJsx(component)
                     newElement.parent = parentElement
                     parentElement.addChild(newElement)
