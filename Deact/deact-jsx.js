@@ -1,22 +1,27 @@
-const extractAttributesFromTag = (attributeString) => {
-    let attributes = [];
-    let regex = /(?<key>\w+)=["']+(?<value>\w+)["']+/g
-    let match;
-    while ((match = regex.exec(attributeString)) != null) {
-        attributes.push({
-            key: match.groups.key,
-            value: match.groups.value
-        })
+
+// const extractAttributesFromTag = (attributeString) => {
+//     let attributes = [];
+//     let regex = /(?<key>\w+)=[']+(?<value>[^']+)['][\s`>]/g
+//     let match;
+//     while ((match = regex.exec(attributeString)) != null) {
+//         console.log(match)
+//         attributes.push({
+//             key: match.groups.key,
+//             value: match.groups.value
+//         })
+//     }
+//     return attributes
+// }
+
+
+
+const createdDeactElementFromOpenTag = (element, parentElement) => {
+    let elementAttributes;
+    if(element.attributes){
+        elementAttributes = extract(element.attributes)
     }
-    return attributes
-}
+    let newElement = new deactElement(element.tag, null, elementAttributes, parentElement);
 
-
-
-const createdDeactElementFromOpenTag = (match, parentElement) => {
-    let elementAttributes = extractAttributesFromTag(match.groups.attributes)
-    let newElement = new deactElement(match.groups.open, match.groups.any, elementAttributes, parentElement);
-    
     if (parentElement) {
         newElement.parent = parentElement
         parentElement.addChild(newElement, parentElement)
@@ -35,45 +40,96 @@ const closeParentElement = (closeTag, parentElement) => {
     parentElement.closed = true;
 }
 
-const matchIsOpenTag = (match) => {
-    return match.groups.open != null;
+
+const tagIsComponent = (tag) => {
+   return tag.charCodeAt(0) >= 65 && tag.charCodeAt(0) <= 90
 }
 
-const matchIsCloseTag = (match) => {
-    return match.groups.close != null;
+const getEndIndex = (string, start) => {
+    let endIndex = string.indexOf(">", start+1)
+    while(string[endIndex-1] == "="){
+        endIndex  = string.indexOf(">", endIndex+1)
+    }
+    return endIndex
 }
 
-const matchIsComponent = (match) => {
-   return match.groups.open.charCodeAt(0) >= 65 && match.groups.open.charCodeAt(0) <= 90
-}
+const Type = {
+    TAG: 1,
+    OPEN_TAG: 2,
+    CLOSE_TAG: 3,
+    ATTRIBUTE: 4,
+    CONTENT: 5
+ };
 
+ const defineTagObject = (type, subString) => {
+    let element = {}
+    if(type == Type.TAG){
+        let regex = /((<(?<open>\w+))|(<\/(?<close>(\w)+)))(?<attributes>.*)>/
+        let match = subString.match(regex)
+        if(match != null){
+            if(match.groups.open){
+                    element.type = Type.OPEN_TAG
+                    element.tag = match.groups.open
+            } else {
+                element.type = Type.CLOSE_TAG
+                element.tag = match.groups.close
+            }
+            if(match.groups.attributes != ""){
+                element.attributes = match.groups.attributes
+            }
+        }
+    } else if(type == Type.CONTENT && subString.trim() != ""){
+        element.type = type 
+        element.string = subString
+    }
+    return element
+ }
+
+const splitStringByTags = function(string){
+    let tags = []
+    let index = 0;
+    let startIndex = string.indexOf("<", index)
+    let endIndex = getEndIndex(string, startIndex)
+    while(startIndex != -1 & endIndex != -1 & endIndex < string.length){
+      tags.push(defineTagObject(Type.TAG, string.slice(startIndex, endIndex+1)))
+      startIndex  = string.indexOf("<", endIndex)
+      let content = string.slice(endIndex+1, startIndex).trim()
+      if(content != ""){
+        tags.push(defineTagObject(Type.CONTENT, string.slice(endIndex+1, startIndex)))
+      }
+      
+      endIndex  = getEndIndex(string, startIndex)
+    }
+    return tags;
+}
 
 const createdReactBasedOnJsx = (jsxString) => {
-    const patternDividingJSXElements = /<(?<open>[a-zA-Z]+)(?<attributes>([^>]*))>(?<any>[^<>]*)|<\/(?<close>[a-z]*)>/g;
     jsxString = jsxString.replace(/(\r\n|\n|\r)/gm, "")
-    let parentElement
-    let match
-    while ((match = patternDividingJSXElements.exec(jsxString)) != null) {
-        if(matchIsOpenTag(match)) {
-            if(matchIsComponent(match)){
-                if (eval(match.groups.open)) {
-                    let component = eval(match.groups.open)()
+    let detectedElements = splitStringByTags(jsxString)
+    let parentElement;
+    for (let element of detectedElements) {
+        if(element.type == Type.OPEN_TAG) {
+            if(tagIsComponent(element.tag)){
+                if (eval(element.tag)) {
+                    let component = eval(element.tag)()
                     newElement = createdReactBasedOnJsx(component)
                     newElement.parent = parentElement
                     parentElement.addChild(newElement)
                 }
                 // parent element stays the same, only child is added
             } else {
-                parentElement = createdDeactElementFromOpenTag(match, parentElement)
+                parentElement = createdDeactElementFromOpenTag(element, parentElement)
             }
-        } else if (matchIsCloseTag) {
-            closeParentElement(match.groups.close, parentElement)
+        } else if (element.type == Type.CLOSE_TAG) {
+            closeParentElement(element.tag, parentElement)
             // tree structure: only top element has no parent
             // if element has no parent, we reached the top  
             if (!parentElement.parent) {
                 break
             }
             parentElement = parentElement.parent
+        } else if(element.type == Type.CONTENT){
+            parentElement.addChild(element.string);
         }
     }
     return parentElement;
@@ -107,6 +163,14 @@ class deactElement {
         } else {
             this.props.children = [child]
 
+        }
+    }
+
+    addContent = (content) => {
+        if(this.content){
+            this.content = this.content+content
+        }else{
+            this.content = content
         }
     }
 }
