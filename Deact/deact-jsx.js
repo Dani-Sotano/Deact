@@ -87,7 +87,7 @@ const splitStringByTags = function(string){
     return tags;
 }
 
-const createdReactBasedOnJsx = (jsxString) => {
+const createdReactBasedOnJsx = (jsxString, parent) => {
     jsxString = jsxString.replace(/(\r\n|\n|\r)/gm, "")
     let detectedElements = splitStringByTags(jsxString)
     let parentElement;
@@ -174,4 +174,6 @@ class deactElement {
             this.content = content
         }
     }
+
+
 }

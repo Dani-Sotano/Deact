@@ -2,7 +2,8 @@ let currentDeact;
 
 const DeactDOM = {
     render: (child, parent) => {
-        const deactElement = createdReactBasedOnJsx(child)
+        parentHTML = parent;
+        const deactElement = createdReactBasedOnJsx(child, parent)
         if (!currentDeact) {
             const javaScriptElement = deactToJavaScript(deactElement)
             currentDeact = deactElement
@@ -26,8 +27,19 @@ const replaceElementsThatDiffer = (newElement, oldElement) => {
             changeClassName(oldElement, newElement)
             oldElement.class = newElement.class
         }
+
         for (let index in newElement.props.children) {
-            replaceElementsThatDiffer(newElement.props.children[index], oldElement.props.children[index])
+            let newElementChild = newElement.props.children[index]
+            let oldElementChild = oldElement.props.children[index]
+            if(typeof newElementChild === "string" && typeof oldElementChild === "string"){
+                if(newElementChild !== oldElementChild){
+                    oldElement.replaceChild(oldElementChild, newElementChild)
+                    let oldJSElement = getOldJSElement(oldElement)
+                    oldJSElement.textContent = newElementChild
+                }
+            } else {
+                replaceElementsThatDiffer(newElementChild, oldElementChild)
+            }
         }
     } else if (oldElement.class !== newElement.class) {
         changeClassName(oldElement, newElement)
@@ -55,6 +67,23 @@ const getOldJSElement = (oldElement) => {
     return document.querySelector(getQuerySelector)
 }
 
+const getAllParentTypes = (oldElement) => {
+    let arr = [{
+        type: oldElement.type,
+        id: oldElement.id,
+        class: oldElement.class
+    }]
+    while(oldElement.parent){
+        arr.unshift({
+            type: oldElement.parent.type,
+            id: oldElement.parent.id,
+            class: oldElement.parent.class
+        })
+        oldElement = oldElement.parent
+    }
+    return arr
+}
+
 const changeClassName = (oldElement, newElement) => {
     let oldJSElement = getOldJSElement(oldElement)
     oldJSElement.className = newElement.class;
@@ -62,7 +91,14 @@ const changeClassName = (oldElement, newElement) => {
 
 
 const createQuerySelector = (oldElement) => {
-    return `${oldElement.type}${oldElement.id ? "#" + oldElement.id : ""}${oldElement.class ? "." + oldElement.class : ""}`
+    let parents = getAllParentTypes(oldElement)
+    let parents2 = parents.map(parent => createString(parent))
+    return `${parents2.join(" ")}${oldElement.id ? "#" + oldElement.id : ""}${oldElement.class ? "." + oldElement.class : ""}`
+}
+
+const createString = (element) => {
+    return `${element.type}${element.id ? "#" + element.id : ""}${element.class ? "." + element.class : ""}`
+
 }
 
 
