@@ -97,6 +97,7 @@ const createdReactBasedOnJsx = (jsxString) => {
                 if (eval(element.tag)) {
                     let component = eval(element.tag)()
                     newElement = createdReactBasedOnJsx(component)
+                    newElement.id = element.tag
                     newElement.parent = parentElement
                     parentElement.addChild(newElement)
                 }
@@ -156,6 +157,14 @@ class deactElement {
             this.props.children = [child]
 
         }
+    }
+
+    replaceChild = (oldElement, newElement) => {
+        let index = this.props.children.indexOf(oldElement);
+        if(index == -1){
+            this.props.children.push(newElement)
+        }
+        this.props.children[index] = newElement
     }
 
     addContent = (content) => {

@@ -1,12 +1,11 @@
 const addAttributesToElement = (deactElement, jsElement) => {
-    if(deactElement.className){
-        jsElement.classList.add(deactElement.className)
+    if(deactElement.class){
+        jsElement.classList.add(deactElement.class)
     }
     if(deactElement.id){
         jsElement.setAttribute("id", deactElement.id)
     }
     if(deactElement.type == "button" && deactElement.onClick != undefined){
-        debugger;
         jsElement.addEventListener('click', eval(deactElement.onClick));
     }
 }
