@@ -1,20 +1,4 @@
 
-// const extractAttributesFromTag = (attributeString) => {
-//     let attributes = [];
-//     let regex = /(?<key>\w+)=[']+(?<value>[^']+)['][\s`>]/g
-//     let match;
-//     while ((match = regex.exec(attributeString)) != null) {
-//         console.log(match)
-//         attributes.push({
-//             key: match.groups.key,
-//             value: match.groups.value
-//         })
-//     }
-//     return attributes
-// }
-
-
-
 const createdDeactElementFromOpenTag = (element, parentElement) => {
     let elementAttributes;
     if(element.attributes){
@@ -147,6 +131,8 @@ class deactElement {
     constructor(type, content, attributes, parent) {
         this.type = type
         if (typeof content == deactElement) {
+            debugger;
+            // attributes are missing
             this.props.children = new deactElement(content.type, content.content, content.parent);
         } else if (typeof content == 'string') {
             this.props.children = [content];
@@ -154,6 +140,12 @@ class deactElement {
                 this[attribute.key] = attribute.value
             }
         }
+        if(attributes){
+            for(let attribute of attributes){
+                this[attribute.key] =  attribute.value
+            }
+        }
+
         this.parent = parent
     }
 

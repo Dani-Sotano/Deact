@@ -61,11 +61,11 @@ const extract = (s) => {
   let rest = s;
 
   while(index<rest.length){
-    let indexOfKeyValueSeparator = s.indexOf("=")
+    let indexOfKeyValueSeparator = rest.indexOf("=")
     if(indexOfKeyValueSeparator > 1){
       let key = rest.slice(0, indexOfKeyValueSeparator).trim()
       rest = rest.slice(indexOfKeyValueSeparator+1).trim()
-      
+
       let valueEndIndices = getEndOfValueIndex(rest) 
       let value = rest.slice(valueEndIndices[0], valueEndIndices[1])
  
