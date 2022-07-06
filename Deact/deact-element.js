@@ -77,6 +77,8 @@ class deactElement {
             return 0
         }
     }
+
+    
     
 }
 

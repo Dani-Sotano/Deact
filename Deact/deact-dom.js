@@ -1,50 +1,83 @@
 let currentDeact;
+let domState = {
+    oldElement: "",
+    newElement: ""
+}
 
 
 const DeactDOM = {
     render: (child, parent) => {
-        const deactElement = createdReactBasedOnJsx(child, parent)
+        domState.newElement = createdReactBasedOnJsx(child, parent)
         if (!currentDeact) {
-            const javaScriptElement = deactToJavaScript(deactElement)
-            currentDeact = deactElement
+            const javaScriptElement = deactToJavaScript(domState.newElement)
+            currentDeact = domState.newElement
             parent.appendChild(javaScriptElement)
         } else {
-            replaceElementsThatDiffer(deactElement, currentDeact)
+            domState.oldElement = currentDeact
+            replaceElementsThatDiffer(domState.oldElement, domState.newElement)
         }
+
     }
 }
 
-const replaceElementsThatDiffer = (newElement, oldElement) => {
-    if (newElement.tag != oldElement.tag || oldElement.id !== newElement.id) {
-        replaceDOMElement(oldElement, newElement)
-    } else if (newElement.props && newElement.props.children && newElement.props.children.length > 0) {
+const completeTagIsReplaced = (oldElement, newElement) => {
+    if (newElement.tag != oldElement.tag ||
+        oldElement.id !== newElement.id) {
+        if (oldElement.parent) {
+            oldElement.parent.replaceChild(oldElement, newElement)
+            currentDeact = getParentElement(oldElement)
+
+            replaceJSElement(oldElement, newElement)
+        } else {
+            currentDeact = newElement
+        }
+        return true;
+    }
+    return false;
+}
+const elementIsAddedAsChild = (oldElement, newElement) => {
+    if (newElement.props && newElement.props.children &&
+        newElement.props.children.length > 0) {
         verifyAndReplaceClassNameIfRequierd(oldElement, newElement)
-        if(!oldElement.props.children){
-            for(let index in newElement.props.children){
+        if (!oldElement.props.children) {
+            for (let index in newElement.props.children) {
                 addNewElementAsChild(oldElement, newElement, index)
             }
-        } else{
+        } else {
             verifyChildren(oldElement, newElement)
-        } 
-    } else if (oldElement.class !== newElement.class) {
+        }
+        return true;
+    }
+    return false;
+}
+const classNameIsReplaced = (oldElement, newElement) => {
+    if (oldElement.class !== newElement.class) {
         changeClassName(oldElement, newElement)
         oldElement.class = newElement.class
+        return true;
     }
-
+    return false;
 }
+
+const replaceElementsThatDiffer = (oldElement, newElement) => {
+    return completeTagIsReplaced(oldElement, newElement) ||
+        elementIsAddedAsChild(oldElement, newElement) ||
+        classNameIsReplaced(oldElement, newElement)
+}
+
 
 const verifyChildren = (oldElement, newElement) => {
     // order children to detect if only order changed
-        newElement.sort()
-        oldElement.sort()
+    newElement.sort()
+    oldElement.sort()
 
-        for (let index in newElement.props.children) {
-            if (!oldElement.props || !oldElement.props.children) {
-                addNewElementAsChild(oldElement, newElement, index)
-            } else {
-                replaceElements(oldElement, newElement, index)
-            }
+    for (let index in newElement.props.children) {
+        if (!oldElement.props || !oldElement.props.children) {
+            addNewElementAsChild(oldElement, newElement, index)
+        } else {
+            replaceElements(oldElement, newElement, index)
         }
+    }
 }
 
 const replaceElements = (oldElement, newElement, index) => {
@@ -53,39 +86,30 @@ const replaceElements = (oldElement, newElement, index) => {
     if (typeof newElementChild === "string" && typeof oldElementChild === "string") {
         if (newElementChild !== oldElementChild) {
             oldElement.replaceChild(oldElementChild, newElementChild)
-            let oldJSElement = getOldJSElement(oldElement)
+            let oldJSElement = getJSElement(oldElement)
             oldJSElement.textContent = newElementChild
         }
     } else {
-        replaceElementsThatDiffer(newElementChild, oldElementChild)
+        replaceElementsThatDiffer(oldElementChild, newElementChild)
     }
-} 
+}
 
 const addNewElementAsChild = (oldElement, newElement, index) => {
     let newElementChild = newElement.props.children[index]
     oldElement.addChild(newElementChild)
-    let oldJSElement = getOldJSElement(oldElement)
+    let oldJSElement = getJSElement(oldElement)
     if (typeof newElementChild === "string") {
         oldJSElement.textContent = newElementChild
     } else {
-        let newJSElement = deactToJavaScript(newElement)
-        let elementToBeReplaced = getOldJSElement(oldElement)
-        elementToBeReplaced.replaceWith(newJSElement)
+        replaceJSElement(oldElement, newElement)
     }
 }
 
-const replaceDOMElement = (oldElement, newElement) => {
-    if (oldElement.parent) {
-        oldElement.parent.replaceChild(oldElement, newElement)
-        currentDeact = getParentElement(oldElement)
 
-        let newJSElement = deactToJavaScript(newElement)
-        let elementToBeReplaced = getOldJSElement(oldElement)
-        elementToBeReplaced.replaceWith(newJSElement)
-    } else {
-        currentDeact = newElement
-    }
-
+const replaceJSElement = (oldElement, newElement) => {
+    let newJSElement = deactToJavaScript(newElement)
+    let oldJSElement = getJSElement(oldElement)
+    oldJSElement.replaceWith(newJSElement)
 }
 
 const getParentElement = (element) => {
@@ -95,7 +119,7 @@ const getParentElement = (element) => {
     return element
 }
 
-const getOldJSElement = (oldElement) => {
+const getJSElement = (oldElement) => {
     let getQuerySelector = createQuerySelector(oldElement)
     return document.querySelector(getQuerySelector)
 }
@@ -118,7 +142,7 @@ const getAllParentTypes = (oldElement) => {
 }
 
 const changeClassName = (oldElement, newElement) => {
-    let oldJSElement = getOldJSElement(oldElement)
+    let oldJSElement = getJSElement(oldElement)
     oldJSElement.className = newElement.class;
 }
 
@@ -126,7 +150,8 @@ const changeClassName = (oldElement, newElement) => {
 const createQuerySelector = (oldElement) => {
     let parentTypes = getAllParentTypes(oldElement)
     let parentsDefinitions = parentTypes.map(parent => createString(parent))
-    return `${parentsDefinitions.join(" ")}${oldElement.id ? "#" + oldElement.id : ""}${oldElement.class ? "." + oldElement.class : ""}`
+    return `${parentsDefinitions.join(" ")}`
+    // ${oldElement.id ? "#" + oldElement.id : ""}${oldElement.class ? "." + oldElement.class : ""}`
 }
 
 const createString = (element) => {
@@ -140,8 +165,3 @@ const verifyAndReplaceClassNameIfRequierd = (oldElement, newElement) => {
         oldElement.class = newElement.class
     }
 }
-
-
-
-
-
