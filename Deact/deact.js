@@ -5,14 +5,14 @@ const addAttributesToElement = (deactElement, jsElement) => {
     if(deactElement.id){
         jsElement.setAttribute("id", deactElement.id)
     }
-    if(deactElement.type == "button" && deactElement.onClick != undefined){
+    if(deactElement.tag == "button" && deactElement.onClick != undefined){
         jsElement.addEventListener('click', eval(deactElement.onClick));
     }
 }
 
 // append nested elements recursively
 const createDocumentElement = (deact) => {
-    let element = document.createElement(deact.type);
+    let element = document.createElement(deact.tag);
     addAttributesToElement(deact, element)
     if(deact.props.children){
         if (typeof deact.props.children == 'string') {

@@ -18,8 +18,8 @@ const closeParentElement = (closeTag, parentElement) => {
     if (parentElement == null) {
         throw console.error(`opening tag is missing for ${closeTag}`);
     }
-    if (closeTag != parentElement.type) {
-        throw console.error(`current tag ${closeTag} does not match parent tag ${parentElement.type}`);
+    if (closeTag != parentElement.tag) {
+        throw console.error(`current tag ${closeTag} does not match parent tag ${parentElement.tag}`);
     }
     parentElement.closed = true;
 }
@@ -121,59 +121,3 @@ const createdReactBasedOnJsx = (jsxString, parent) => {
 }
 
 
-class deactElement {
-    type
-    value
-    onChange
-    props = {}
-    closed = false
-    parent
-
-    constructor(type, content, attributes, parent) {
-        this.type = type
-        if (typeof content == deactElement) {
-            debugger;
-            // attributes are missing
-            this.props.children = new deactElement(content.type, content.content, content.parent);
-        } else if (typeof content == 'string') {
-            this.props.children = [content];
-            for (let attribute of attributes) {
-                this[attribute.key] = attribute.value
-            }
-        }
-        if(attributes){
-            for(let attribute of attributes){
-                this[attribute.key] =  attribute.value
-            }
-        }
-
-        this.parent = parent
-    }
-
-    addChild = (child) => {
-        if (this.props.children) {
-                this.props.children.push(child)
-        } else {
-            this.props.children = [child]
-
-        }
-    }
-
-    replaceChild = (oldElement, newElement) => {
-        let index = this.props.children.indexOf(oldElement);
-        if(index == -1){
-            this.props.children.push(newElement)
-        }
-        this.props.children[index] = newElement
-    }
-
-    addContent = (content) => {
-        if(this.content){
-            this.content = this.content+content
-        }else{
-            this.content = content
-        }
-    }
-
-
-}
