@@ -11,11 +11,10 @@ My own React creation as a learning playground.
 I started to implement React by myself to generate a better understanding of how React works under the surface. There are two main principles that I focused on: The translation from JSX to JavaScript and the usage of a Virtual DOM to only render parts that were updated. 
 
 <p float="left">
+  <img src="https://user-images.githubusercontent.com/102987416/177684499-c6d33a49-b971-4083-b704-e7fbe02dc60e.png" width="100" /> 
   <img src="https://user-images.githubusercontent.com/102987416/177684481-3bcbfaf3-86f4-45a7-9db0-5d7661a12845.png"
  width="100" />
-  <img src="Screenshot_2022-07-06_at_09 16 05" src="https://user-images.githubusercontent.com/102987416/177684499-c6d33a49-b971-4083-b704-e7fbe02dc60e.png" width="100" /> 
 </p>
-<img width="122" alt="Screenshot_2022-07-06_at_09 16 05" src="https://user-images.githubusercontent.com/102987416/177684499-c6d33a49-b971-4083-b704-e7fbe02dc60e.png">
 
 In this example, you can click on each of the buttons and another change is triggered, only updating the parts that have been changed. This simple functionality was created with Deact - my own React. During the process of implementing it, I did not only generate a better understanding of React, but I also was learning a lot about Javascript and how to manipulate the DOM. In the next lines, I want to share my learnings.
 
