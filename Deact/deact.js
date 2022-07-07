@@ -5,7 +5,7 @@ const addAttributesToElement = (deactElement, jsElement) => {
     if(deactElement.id){
         jsElement.setAttribute("id", deactElement.id)
     }
-    if(deactElement.tag == "button" && deactElement.onClick != undefined){
+    if(deactElement.onClick != undefined){
         jsElement.addEventListener('click', eval(deactElement.onClick));
     }
 }

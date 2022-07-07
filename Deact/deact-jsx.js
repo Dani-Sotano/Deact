@@ -1,33 +1,4 @@
-
-const createdDeactElementFromOpenTag = (element, parentElement) => {
-    let elementAttributes;
-    if(element.attributes){
-        elementAttributes = extract(element.attributes)
-    }
-    let newElement = new deactElement(element.tag, null, elementAttributes, parentElement);
-
-    if (parentElement) {
-        newElement.parent = parentElement
-        parentElement.addChild(newElement, parentElement)
-    }
-    return newElement;
-}
-
-
-const closeParentElement = (closeTag, parentElement) => {
-    if (parentElement == null) {
-        throw console.error(`opening tag is missing for ${closeTag}`);
-    }
-    if (closeTag != parentElement.tag) {
-        throw console.error(`current tag ${closeTag} does not match parent tag ${parentElement.tag}`);
-    }
-    parentElement.closed = true;
-}
-
-
-const tagIsComponent = (tag) => {
-   return tag.charCodeAt(0) >= 65 && tag.charCodeAt(0) <= 90
-}
+// the splitting
 
 const getEndIndex = (string, start) => {
     let endIndex = string.indexOf(">", start+1)
@@ -69,39 +40,77 @@ const Type = {
     return element
  }
 
-const splitStringByTags = function(string){
+const splitStringIntoTagsAttributesOrContent = function(string){
+    jsxString = string.replace(/(\r\n|\n|\r)/gm, "")
+
     let tags = []
     let index = 0;
-    let startIndex = string.indexOf("<", index)
-    let endIndex = getEndIndex(string, startIndex)
-    while(startIndex != -1 & endIndex != -1 & endIndex < string.length){
-      tags.push(defineTagObject(Type.TAG, string.slice(startIndex, endIndex+1)))
-      startIndex  = string.indexOf("<", endIndex)
-      let content = string.slice(endIndex+1, startIndex).trim()
+    let startIndex = jsxString.indexOf("<", index)
+    let endIndex = getEndIndex(jsxString, startIndex)
+    while(startIndex != -1 & endIndex != -1 & endIndex < jsxString.length){
+      tags.push(defineTagObject(Type.TAG, jsxString.slice(startIndex, endIndex+1)))
+      startIndex  = jsxString.indexOf("<", endIndex)
+      let content = jsxString.slice(endIndex+1, startIndex).trim()
       if(content != ""){
-        tags.push(defineTagObject(Type.CONTENT, string.slice(endIndex+1, startIndex)))
+        tags.push(defineTagObject(Type.CONTENT,jsxString.slice(endIndex+1, startIndex)))
       }
       
-      endIndex  = getEndIndex(string, startIndex)
+      endIndex  = getEndIndex(jsxString, startIndex)
     }
     return tags;
 }
 
-const createdReactBasedOnJsx = (jsxString, parent) => {
-    jsxString = jsxString.replace(/(\r\n|\n|\r)/gm, "")
-    let detectedElements = splitStringByTags(jsxString)
+// the nesting
+
+const createdDeactElementFromOpenTag = (element, parentElement) => {
+    let elementAttributes;
+    if(element.attributes){
+        elementAttributes = extract(element.attributes)
+    }
+    let newElement = new deactElement(element.tag, null, elementAttributes, parentElement);
+
+    if (parentElement) {
+        newElement.parent = parentElement
+        parentElement.addChild(newElement, parentElement)
+    }
+    return newElement;
+}
+
+
+const closeParentElement = (closeTag, parentElement) => {
+    if (parentElement == null) {
+        throw console.error(`opening tag is missing for ${closeTag}`);
+    }
+    if (closeTag != parentElement.tag) {
+        throw console.error(`current tag ${closeTag} does not match parent tag ${parentElement.tag}`);
+    }
+    parentElement.closed = true;
+}
+
+
+const tagIsComponent = (tag) => {
+   return tag.charCodeAt(0) >= 65 && tag.charCodeAt(0) <= 90
+}
+
+
+
+const createdComponentAndAddedAsChild = (element, parentElement) => {
+    if (eval(element.tag)) {
+        let component = eval(element.tag)()
+        newElement = createdReactBasedOnJsx(component)
+        newElement.id = element.tag
+        newElement.parent = parentElement
+        parentElement.addChild(newElement)
+    }
+    // parent element stays the same, only child is added
+}
+
+const createdAndNestedDeactElementsBasedOn = (splittedElements) =>{
     let parentElement;
-    for (let element of detectedElements) {
+    for (let element of splittedElements) {
         if(element.type == Type.OPEN_TAG) {
             if(tagIsComponent(element.tag)){
-                if (eval(element.tag)) {
-                    let component = eval(element.tag)()
-                    newElement = createdReactBasedOnJsx(component)
-                    newElement.id = element.tag
-                    newElement.parent = parentElement
-                    parentElement.addChild(newElement)
-                }
-                // parent element stays the same, only child is added
+                createdComponentAndAddedAsChild(element, parentElement)
             } else {
                 parentElement = createdDeactElementFromOpenTag(element, parentElement)
             }
@@ -118,6 +127,11 @@ const createdReactBasedOnJsx = (jsxString, parent) => {
         }
     }
     return parentElement;
+}
+
+const createdReactBasedOnJsx = (jsxString) => {
+    let splittedElements = splitStringIntoTagsAttributesOrContent(jsxString)
+    return createdAndNestedDeactElementsBasedOn(splittedElements)
 }
 
 

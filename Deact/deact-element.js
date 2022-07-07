@@ -78,6 +78,55 @@ class deactElement {
         }
     }
 
+    addNewElementAsChild = (newElement, child) => {
+        this.addChild(child)
+        let oldJSElement = this.getJSElement(oldElement)
+        if (typeof child === "string") {
+            oldJSElement.textContent = child
+        } else {
+            this.replaceJSElement(newElement)
+        }
+    }
+    
+    
+    replaceJSElement = (newElement) => {
+        let newJSElement = deactToJavaScript(newElement)
+        let oldJSElement = this.getJSElement()
+        oldJSElement.replaceWith(newJSElement)
+    }
+    
+    getJSElement = () => {
+        let getQuerySelector = this.createQuerySelector(this)
+        return document.querySelector(getQuerySelector)
+    }
+
+    createQuerySelector = (oldElement) => {
+        let parentTypes = this.getAllParentTypes(oldElement)
+        return `${parentTypes.join(" ")}`
+        }
+    
+    createString = (element) => {
+        return `${element.tag}${element.id ? "#" + element.id : ""}${element.class ? "." + element.class : ""}`
+    
+    }
+
+    getAllParentTypes = (oldElement) => {
+        let parentTypes = [{
+            tag: oldElement.tag,
+            id: oldElement.id,
+            class: oldElement.class
+        }]
+        while (oldElement.parent) {
+            parentTypes.unshift({
+                tag: oldElement.parent.tag,
+                id: oldElement.parent.id,
+                class: oldElement.parent.class
+            })
+            oldElement = oldElement.parent
+        }
+        return parentTypes.map(parent => this.createString(parent))
+    }
+
     
     
 }

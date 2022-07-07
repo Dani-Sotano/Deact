@@ -67,7 +67,7 @@ const extract = (s) => {
       rest = rest.slice(indexOfKeyValueSeparator+1).trim()
 
       let valueEndIndices = getEndOfValueIndex(rest) 
-      let value = rest.slice(valueEndIndices[0], valueEndIndices[1])
+      let value = rest.slice(valueEndIndices[0], valueEndIndices[1]).trim()
  
       rest = rest.slice(valueEndIndices[1]+1).trim()
       
