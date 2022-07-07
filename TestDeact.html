@@ -7,8 +7,10 @@
                 width: 8em;
                 text-align: center;
             }
+
             button {
-                background-color: #f7ae55; /* Green */
+                background-color: #f7ae55;
+                /* Green */
                 border: none;
                 color: white;
                 padding: 20px 20px;
@@ -18,9 +20,15 @@
                 display: inline-block;
                 font-size: 12px;
             }
-            button.before {background-color:rgba(36, 162, 179, 0.561);}
-            button.after {background-color:rgb(245, 74, 74);}
-          </style>
+
+            button.before {
+                background-color: rgba(36, 162, 179, 0.561);
+            }
+
+            button.after {
+                background-color: rgb(245, 74, 74);
+            }
+        </style>
         <script type="text/javascript" src="./Deact/deact.js"></script>
         <script type="text/javascript" src="./Deact/deact-dom.js"></script>
         <script type="text/javascript" src="./Deact/deact-jsx.js"></script>
@@ -69,16 +77,16 @@
                         <div id="component">${state.type}</div>
                     </p>
                 </div>`
-            } 
+            }
 
-            function setValue(e){
+            function setValue(e) {
                 state.list.push(Math.random());
-                setState(state.e)
+                setState(state)
             }
 
             function updateEventCount() {
                 state.eventCount = state.eventCount + 1;
-                setState(state.e)
+                setState(state)
             }
 
             function classNameChange(e) {
@@ -88,7 +96,7 @@
                 } else {
                     state.name = "before"
                 }
-                setState(state.e)
+                setState(state)
             }
 
             function changeComponent() {
@@ -97,7 +105,7 @@
                 } else {
                     state.type = "<Service />"
                 }
-                setState(state.e)
+                setState(state)
             }
 
             function renderApp() {

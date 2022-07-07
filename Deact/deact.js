@@ -1,11 +1,11 @@
 const addAttributesToElement = (deactElement, jsElement) => {
-    if(deactElement.class){
+    if (deactElement.class) {
         jsElement.classList.add(deactElement.class)
     }
-    if(deactElement.id){
+    if (deactElement.id) {
         jsElement.setAttribute("id", deactElement.id)
     }
-    if(deactElement.onClick != undefined){
+    if (deactElement.onClick != undefined) {
         jsElement.addEventListener('click', eval(deactElement.onClick));
     }
 }
@@ -14,7 +14,7 @@ const addAttributesToElement = (deactElement, jsElement) => {
 const createDocumentElement = (deact) => {
     let element = document.createElement(deact.tag);
     addAttributesToElement(deact, element)
-    if(deact.props.children){
+    if (deact.props.children) {
         if (typeof deact.props.children == 'string') {
             element.textContent = deact.props.children;
         } else {

@@ -17,9 +17,9 @@ class deactElement {
                 this[attribute.key] = attribute.value
             }
         }
-        if(attributes){
-            for(let attribute of attributes){
-                this[attribute.key] =  attribute.value
+        if (attributes) {
+            for (let attribute of attributes) {
+                this[attribute.key] = attribute.value
             }
         }
 
@@ -28,7 +28,7 @@ class deactElement {
 
     addChild = (child) => {
         if (this.props.children) {
-                this.props.children.push(child)
+            this.props.children.push(child)
         } else {
             this.props.children = [child]
         }
@@ -36,21 +36,21 @@ class deactElement {
 
     replaceChild = (oldElement, newElement) => {
         let index = this.props.children.indexOf(oldElement);
-        if(index == -1){
+        if (index == -1) {
             this.props.children.push(newElement)
         }
         this.props.children[index] = newElement
     }
 
     addContent = (content) => {
-        if(this.content){
-            this.content = this.content+content
-        }else{
+        if (this.content) {
+            this.content = this.content + content
+        } else {
             this.content = content
         }
     }
 
-    sort(){
+    sort() {
         this.props.children.sort((first, second) => {
             let lowerValue = this.getLowerValue(first.tag, second.tag);
             if (lowerValue != 0) {
@@ -87,14 +87,14 @@ class deactElement {
             this.replaceJSElement(newElement)
         }
     }
-    
-    
+
+
     replaceJSElement = (newElement) => {
         let newJSElement = deactToJavaScript(newElement)
         let oldJSElement = this.getJSElement()
         oldJSElement.replaceWith(newJSElement)
     }
-    
+
     getJSElement = () => {
         let getQuerySelector = this.createQuerySelector(this)
         return document.querySelector(getQuerySelector)
@@ -103,11 +103,11 @@ class deactElement {
     createQuerySelector = (oldElement) => {
         let parentTypes = this.getAllParentTypes(oldElement)
         return `${parentTypes.join(" ")}`
-        }
-    
+    }
+
     createString = (element) => {
         return `${element.tag}${element.id ? "#" + element.id : ""}${element.class ? "." + element.class : ""}`
-    
+
     }
 
     getAllParentTypes = (oldElement) => {
@@ -127,7 +127,7 @@ class deactElement {
         return parentTypes.map(parent => this.createString(parent))
     }
 
-    
-    
+
+
 }
 
