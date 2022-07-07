@@ -1,0 +1,116 @@
+<body>
+    <div id='root'>
+        <style>
+            div p {
+                margin-left: auto;
+                margin-right: auto;
+                width: 8em;
+                text-align: center;
+            }
+            button {
+                background-color: #f7ae55; /* Green */
+                border: none;
+                color: white;
+                padding: 20px 20px;
+                margin: 10px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 12px;
+            }
+            button.before {background-color:rgba(36, 162, 179, 0.561);}
+            button.after {background-color:rgb(245, 74, 74);}
+          </style>
+        <script type="text/javascript" src="./Deact/deact.js"></script>
+        <script type="text/javascript" src="./Deact/deact-dom.js"></script>
+        <script type="text/javascript" src="./Deact/deact-jsx.js"></script>
+        <script type="text/javascript" src="./Deact/deact-element.js"></script>
+        <script type="text/javascript" src="./Product.js"></script>
+        <script type="text/javascript" src="./Service.js"></script>
+        <script type="text/javascript" src="./Deact/extract-attributes.js"></script>
+        <script type="text/javascript">
+            const rootElement = document.getElementById('root')
+
+            const state = {
+                eventCount: 10,
+                type: "<Service />",
+                name: 'before',
+                content: 'crazy text',
+                list: []
+            }
+
+            function App() {
+                return `<div id="App">
+                    <p>
+                        <button 
+                            class="${state.name}"
+                            id="classNameButton" 
+                            onClick="classNameChange"
+                        > 
+                            Change Color
+                        </button>
+                    </p>
+                    <p>
+                        <button 
+                            id="updateEventButton" 
+                            onClick="updateEventCount"
+                        > 
+                            Update count
+                        </button>
+                        <div id="eventCount">${state.eventCount}</div>
+                    </p>
+                    <p>
+                        <button 
+                            id="changeCompoonentButton" 
+                            onClick="changeComponent"
+                        > 
+                        Change Component
+                        </button>
+                        <div id="component">${state.type}</div>
+                    </p>
+                </div>`
+            } 
+
+            function setValue(e){
+                state.list.push(Math.random());
+                setState(state.e)
+            }
+
+            function updateEventCount() {
+                state.eventCount = state.eventCount + 1;
+                setState(state.e)
+            }
+
+            function classNameChange(e) {
+                let className = e.target.className
+                if (className === "before") {
+                    state.name = "after"
+                } else {
+                    state.name = "before"
+                }
+                setState(state.e)
+            }
+
+            function changeComponent() {
+                if (state.type === "<Service />") {
+                    state.type = "<Product />"
+                } else {
+                    state.type = "<Service />"
+                }
+                setState(state.e)
+            }
+
+            function renderApp() {
+                DeactDOM.render(App(), rootElement)
+            }
+
+            function setState(newState) {
+                Object.assign(state, newState)
+
+                renderApp();
+            }
+
+            renderApp()
+        </script>
+    </div>
+</body>
